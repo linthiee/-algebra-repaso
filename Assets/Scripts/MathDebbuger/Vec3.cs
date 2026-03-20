@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using Unity.VisualScripting;
 namespace CustomMath
 {
     public struct Vec3 : IEquatable<Vec3>
@@ -12,8 +13,8 @@ namespace CustomMath
         public float z;
 
         public float sqrMagnitude { get { return (x * x) + (y * y) + (z * z); } }
-        public Vector3 normalized { get { if (magnitude == 0) return Vec3.Zero; return (new Vector3((x / magnitude), (y / magnitude), (z / magnitude))); } }
-        public float magnitude { get { return (float)(Math.Sqrt((double)sqrMagnitude)); } }
+        public Vec3 normalized { get { if (magnitude == 0) return Vec3.Zero; return (new Vec3((x / magnitude), (y / magnitude), (z / magnitude))); } }
+        public float magnitude { get { return (MathF.Sqrt(sqrMagnitude)); } }
         #endregion
 
         #region constants
@@ -130,31 +131,38 @@ namespace CustomMath
         }
         public static float Angle(Vec3 from, Vec3 to)
         {
-            throw new NotImplementedException();
+            return (MathF.Acos((Vec3.Dot(from, to) / (Vec3.Magnitude(from) * (Vec3.Magnitude(to))))) * Mathf.Rad2Deg);
         }
         public static Vec3 ClampMagnitude(Vec3 vector, float maxLength)
         {
-            throw new NotImplementedException();
+            if (vector.magnitude > maxLength)
+            {
+                return (vector.normalized * maxLength);
+            }
+
+            return vector;
         }
         public static float Magnitude(Vec3 vector)
         {
-            throw new NotImplementedException();
+            return (Mathf.Sqrt((vector.x * vector.x) + (vector.y * vector.y) + (vector.z * vector.z)));
         }
         public static Vec3 Cross(Vec3 a, Vec3 b)
         {
-            throw new NotImplementedException();
-        }
+            return (new Vec3((a.y*b.z) - (a.z*b.y), (a.z*b.x) - (a.x*b.z), (a.x*b.y) - (a.y*b.z)));
+         }
         public static float Distance(Vec3 a, Vec3 b)
         {
-            throw new NotImplementedException();
+            return (MathF.Sqrt(((a.x - b.x) * (a.x - b.x)) + ((a.y - b.y) * (a.y - b.y)) + ((a.z - b.z) * (a.z - b.z))));
         }
         public static float Dot(Vec3 a, Vec3 b)
         {
-            throw new NotImplementedException();
+            return ((a.x * b.x) + (a.y * b.y) + (a.z * b.z));
         }
         public static Vec3 Lerp(Vec3 a, Vec3 b, float t)
         {
-            throw new NotImplementedException();
+            Math.Clamp(t, 0.0, 1.0);
+
+            return ((a + (b - a) * t));
         }
         public static Vec3 LerpUnclamped(Vec3 a, Vec3 b, float t)
         {
