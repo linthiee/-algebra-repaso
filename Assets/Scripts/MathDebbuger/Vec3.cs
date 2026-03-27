@@ -148,7 +148,7 @@ namespace CustomMath
         }
         public static Vec3 Cross(Vec3 a, Vec3 b)
         {
-            return (new Vec3((a.y * b.z) - (a.z * b.y), (a.z * b.x) - (a.x * b.z), (a.x * b.y) - (a.y * b.z)));
+            return (new Vec3((a.y * b.z) - (a.z * b.y), (a.z * b.x) - (a.x * b.z), (a.x * b.y) - (a.y * b.x)));
         }
         public static float Distance(Vec3 a, Vec3 b)
         {
@@ -170,15 +170,15 @@ namespace CustomMath
         }
         public static Vec3 Max(Vec3 a, Vec3 b)
         {
-            return (a.x > b.x && a.y > b.y && a.z > b.z) ? a : b;
+            return new Vec3(Mathf.Max(a.x, b.x), Mathf.Max(a.y, b.y), Mathf.Max(a.z, b.z));
         }
         public static Vec3 Min(Vec3 a, Vec3 b)
         {
-            return (a.x < b.x && a.y < b.y && a.z < b.z) ? a : b;
+            return new Vec3(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Min(a.z, b.z));
         }
         public static float SqrMagnitude(Vec3 vector)
         {
-            return (MathF.Sqrt(vector.magnitude * vector.magnitude));
+            return (MathF.Sqrt(vector.magnitude));
         }
         public static Vec3 Project(Vec3 vector, Vec3 onNormal)
         {
@@ -210,9 +210,9 @@ namespace CustomMath
             }
             else
             {
-                x = 0;
-                y = 0;
-                z = 0;
+                x = 1;
+                y = 1;
+                z = 1;
             }
         }
         #endregion
