@@ -189,8 +189,9 @@ namespace CustomMath
         }
         public static Vec3 Reflect(Vec3 inDirection, Vec3 inNormal)
         {
-            float angle = Angle(inDirection, inNormal) * 2;
+            float projMagnitude = Dot(inDirection, inNormal.normalized);
 
+            return (new Vec3(inDirection - (2.0f * projMagnitude * inNormal.normalized)));
         }
         public void Set(float newX, float newY, float newZ)
         {
