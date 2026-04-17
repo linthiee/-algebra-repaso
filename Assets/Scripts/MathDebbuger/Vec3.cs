@@ -178,15 +178,19 @@ namespace CustomMath
         }
         public static float SqrMagnitude(Vec3 vector)
         {
-            return (MathF.Sqrt(vector.magnitude));
+            return vector.magnitude * vector.magnitude;
         }
         public static Vec3 Project(Vec3 vector, Vec3 onNormal)
         {
-            throw new NotImplementedException();
+            float angle = Angle(vector, onNormal);
+            float projection = vector.magnitude * (MathF.Cos(angle));
+
+            return (new Vec3(onNormal.x * projection, onNormal.y * projection, onNormal.z * projection));
         }
         public static Vec3 Reflect(Vec3 inDirection, Vec3 inNormal)
         {
-            throw new NotImplementedException();
+            float angle = Angle(inDirection, inNormal) * 2;
+
         }
         public void Set(float newX, float newY, float newZ)
         {
