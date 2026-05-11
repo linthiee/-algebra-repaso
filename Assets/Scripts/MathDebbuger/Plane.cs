@@ -8,7 +8,7 @@ namespace CustomMath
         public float distance;
         public MyPlane flipped()
         {
-            return new MyPlane(-normal, -distance);
+            return new MyPlane(-normal, distance);
         }
 
         public MyPlane(Vec3 inNormal, Vec3 inPoint)
