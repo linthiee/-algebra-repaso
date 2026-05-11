@@ -22,16 +22,7 @@ public class Tester : MonoBehaviour
 
         Vector3 a = new Vector3(3, 3, 4);
         Vector3 normal = new Vector3(1, 1, 1);
-
-        Vec3 a2 = new Vec3(3, 3, 4);
-        Vec3 normal2 = new Vec3(1, 1, 1);
-
-        Vector3 unityProj = Vector3.Project(a, normal);
-        Vec3 myProj = Vec3.Project(a2, normal2);
-
-        Console.WriteLine(unityProj);
-        Console.WriteLine(myProj);
-}
+    }
 
     // Update is called once per frame
     void Update()
