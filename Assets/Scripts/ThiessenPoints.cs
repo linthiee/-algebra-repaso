@@ -1,5 +1,4 @@
 using CustomMath;
-using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,6 +6,7 @@ public class ThiessenPoints
 {
     public Vec3 position;
     public List<MyPlane> boundingPlanes = new List<MyPlane>();
+    public Color color;
 
     public bool ContainsPoint(Vec3 checkPosition)
     {
@@ -18,10 +18,5 @@ public class ThiessenPoints
             }
         }
         return true;
-    }
-
-    public void DrawPoints()
-    {
-        Gizmos.DrawSphere(position, 0.5f);
     }
 }
