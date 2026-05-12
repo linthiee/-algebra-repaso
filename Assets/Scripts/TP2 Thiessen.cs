@@ -6,7 +6,7 @@ public class TP2Thiessen : MonoBehaviour
 {
     [SerializeField] private float boundingPlaneSize = 5.0f;
 
-    [SerializeField] public List<Vec3> interestPoints = new List<Vec3>();
+    [SerializeField] private int numberOfPoints = 5;
 
     private List<ThiessenPoints> myPoints = new List<ThiessenPoints>();
 
@@ -17,6 +17,7 @@ public class TP2Thiessen : MonoBehaviour
     private const int size = 6;
 
     private MyPlane[] boundingPlanes = new MyPlane[size];
+  
 
     private void Start()
     {
@@ -34,15 +35,19 @@ public class TP2Thiessen : MonoBehaviour
             DrawPlane(boundingPlanes[i]);
         }
 
-        foreach (Vec3 point in interestPoints)
+        for (int i = 0; i < numberOfPoints; i++)
         {
+            float limit = boundingPlaneSize * 0.9f;
+            float randomX = UnityEngine.Random.Range(-limit, limit);
+            float randomY = UnityEngine.Random.Range(-limit, limit);
+            float randomZ = UnityEngine.Random.Range(-limit, limit);
+
             ThiessenPoints newPoint = new ThiessenPoints();
-            newPoint.position = point;
+            newPoint.position = new Vec3(randomX, randomY, randomZ);
 
-            for (int i = 0; i < size; i++)
+            for (int j = 0; j < size; j++)
             {
-                newPoint.boundingPlanes.Add(boundingPlanes[i]);
-
+                newPoint.boundingPlanes.Add(boundingPlanes[j]);
             }
 
             myPoints.Add(newPoint);
@@ -60,6 +65,13 @@ public class TP2Thiessen : MonoBehaviour
         {
             Vec3 center = -boundingPlanes[i].normal * boundingPlanes[i].distance;
             Gizmos.DrawLine(center, center + (boundingPlanes[i].normal * 2.0f));
+        }
+
+        Gizmos.color = Color.green;
+
+        foreach (ThiessenPoints point in myPoints)
+        {
+            Gizmos.DrawSphere(point.position, 0.5f);
         }
     }
     private MyPlane CreatePlane(Vec3 normal, float d)
