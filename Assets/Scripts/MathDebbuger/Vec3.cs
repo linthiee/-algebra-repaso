@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using Unity.VisualScripting;
+
 namespace CustomMath
 {
     public struct Vec3 : IEquatable<Vec3>
