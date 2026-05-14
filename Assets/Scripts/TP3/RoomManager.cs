@@ -14,7 +14,7 @@ public class RoomManager : MonoBehaviour
         foreach (Room room in allRooms)
         {
             if (room.ContainsPlayer(new Vec3(player.position)))
-            { 
+            {
                 Debug.Log($"{room.name} is the current room");
             }
         }

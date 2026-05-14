@@ -1,6 +1,5 @@
 using CustomMath;
 using UnityEngine;
-using static UnityEditor.FilePathAttribute;
 public class Frustum : MonoBehaviour 
 {
     [SerializeField] float nearClip = 0.3f;
