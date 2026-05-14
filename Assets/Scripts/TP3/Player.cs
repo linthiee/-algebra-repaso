@@ -11,7 +11,12 @@ public class Player : MonoBehaviour
     {
         public Vec3 originalPos;
         public Vec3 direction;
+        public Vec3 originalDirection;
     }
+
+    [SerializeField] private int maxRays = 6;
+
+    [SerializeField] private int maxCheckPerRay = 6;
 
     [SerializeField] private Rigidbody rb;
     [SerializeField] Camera mainCamera;
@@ -27,6 +32,17 @@ public class Player : MonoBehaviour
 
     [SerializeField] private float rayLength = 15.0f;
 
+    private float angle;
+    private void Start()
+    {
+        for (int i = 0; i <= maxRays; i++)
+        {
+            angle = Mathf.Lerp(-mainCamera.fieldOfView, mainCamera.fieldOfView, (float)i / maxRays);
+            Quaternion rotAngle = Quaternion.Euler(0, angle, 0);
+
+            playerRay.Add(new Line { originalPos = Vec3.Zero, direction = new Vec3(rotAngle * Vec3.Forward), originalDirection = new Vec3(rotAngle * Vec3.Forward) });
+        }
+    }
     private void Update()
     {
         Vec3 direction = Vec3.Zero;
@@ -57,16 +73,20 @@ public class Player : MonoBehaviour
 
         rb.rotation = Quaternion.Euler(0f, -angle * mouseSensitivity, 0f);
 
-        foreach(Line line in playerRay)
+        foreach (Line line in playerRay)
         {
-            line.direction = new Vec3(mainCamera.transform.rotation * Vec3.Forward);
+            line.direction = new Vec3(mainCamera.transform.rotation * line.originalDirection);
         }
 
         foreach (Line line in playerRay)
         {
             Vec3 origin = new Vec3(mainCamera.transform.position);
-            Vec3 point = Vec3.Lerp(line.originalPos, line.direction * rayLength, 0.5f);
-            roomManager.CheckPointOnCurrentRoom(point + origin);
+
+            for (int i = 0; i < maxCheckPerRay; i++)
+            {
+                Vec3 point = Vec3.Lerp(line.originalPos, line.direction * rayLength, (float)i / maxCheckPerRay);
+                roomManager.CheckPointOnCurrentRoom(point + origin);
+            }
         }
     }
 
@@ -81,10 +101,13 @@ public class Player : MonoBehaviour
 
         foreach (Line line in playerRay)
         {
-            Vec3 point = Vec3.Lerp(line.originalPos, line.direction * rayLength, 0.5f);
-
             Gizmos.DrawRay(origin + line.originalPos, line.direction * rayLength);
-            Gizmos.DrawSphere(point + origin, 0.5f);
+
+            for (int i = 0; i < maxCheckPerRay; i++)
+            {
+                Vec3 pointToCheck = Vec3.Lerp(line.originalPos, line.direction * rayLength, (float)i / maxCheckPerRay);
+                Gizmos.DrawWireSphere(pointToCheck + origin, 0.5f);
+            }
         }
     }
 }

@@ -5234,6 +5234,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40fc688618760064e81063a1dff82bd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxRays: 20
   rb: {fileID: 1926372123}
   mainCamera: {fileID: 1124142059}
   mouseSensitivity: 3
@@ -5245,6 +5246,10 @@ MonoBehaviour:
       y: 0
       z: 0
     direction:
+      x: 0
+      y: 0
+      z: 0
+    originalDirection:
       x: 0
       y: 0
       z: 0
