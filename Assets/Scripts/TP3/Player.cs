@@ -1,20 +1,31 @@
 using CustomMath;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
+using static Player;
 
 public class Player : MonoBehaviour
 {
+    [Serializable]
+    public class Line
+    {
+        public Vec3 originalPos;
+        public Vec3 direction;
+    }
+
     [SerializeField] private Rigidbody rb;
     [SerializeField] Camera mainCamera;
 
     [SerializeField] private float mouseSensitivity = 1.0f;
     [SerializeField] private float speed = 5.0f;
 
-    public RoomManager currentRoom;
-    public Transform testDoor;
+    public RoomManager roomManager;
 
     private Vec3 moveDirection;
 
-    private Vec3[] playerRay = new Vec3[1];
+    [SerializeField] private List<Line> playerRay;
+
+    [SerializeField] private float rayLength = 15.0f;
 
     private void Update()
     {
@@ -46,9 +57,17 @@ public class Player : MonoBehaviour
 
         rb.rotation = Quaternion.Euler(0f, -angle * mouseSensitivity, 0f);
 
-        Vec3 forwardDirection = new Vec3(mainCamera.transform.rotation * Vec3.Forward);
+        foreach(Line line in playerRay)
+        {
+            line.direction = new Vec3(mainCamera.transform.rotation * Vec3.Forward);
+        }
 
-        playerRay[0] = forwardDirection;
+        foreach (Line line in playerRay)
+        {
+            Vec3 origin = new Vec3(mainCamera.transform.position);
+            Vec3 point = Vec3.Lerp(line.originalPos, line.direction * rayLength, 0.5f);
+            roomManager.CheckPointOnCurrentRoom(point + origin);
+        }
     }
 
     private void FixedUpdate()
@@ -59,6 +78,13 @@ public class Player : MonoBehaviour
     {
         Gizmos.color = Color.green;
         Vec3 origin = new Vec3(mainCamera.transform.position);
-        Gizmos.DrawLine(origin, origin + (playerRay[0] * 5.0f));
+
+        foreach (Line line in playerRay)
+        {
+            Vec3 point = Vec3.Lerp(line.originalPos, line.direction * rayLength, 0.5f);
+
+            Gizmos.DrawRay(origin + line.originalPos, line.direction * rayLength);
+            Gizmos.DrawSphere(point + origin, 0.5f);
+        }
     }
 }

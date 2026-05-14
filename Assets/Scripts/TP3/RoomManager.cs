@@ -5,6 +5,7 @@ using CustomMath;
 public class RoomManager : MonoBehaviour
 {
     public List<Room> allRooms;
+    public List<Room> alreadyCheckedRooms;
 
     public Camera playerCamera;
     public Transform player;
@@ -12,17 +13,17 @@ public class RoomManager : MonoBehaviour
     private Room currentRoom;
 
     public Frustum frustum;
-    private void Start()
-    {
-        HideAllRooms();
-    }
 
     private void Update()
     {
+        HideAllRooms();
+
         foreach (Room room in allRooms)
         {
             if (room.ContainsPlayer(new Vec3(player.position)))
             {
+                room.gameObject.SetActive(true);
+
                 Debug.Log($"{room.name} is the current room");
                 currentRoom = room;
 
@@ -35,6 +36,33 @@ public class RoomManager : MonoBehaviour
             }
         }
 
+        CheckConnectedRooms();
+    }
+
+    public void CheckPointOnAdjacentRooms(Room room, Vec3 pointToCheck)
+    {
+        foreach (Door door in room.doors)
+        {
+            if (door.connectedRoom != null)
+            {
+                if (door.connectedRoom.ContainsPlayer(pointToCheck))
+                {
+                    door.connectedRoom.gameObject.SetActive(true);
+                    foreach (GameObject obj in door.connectedRoom.insideObjects)
+                    {
+                        obj.SetActive(true);
+                    }
+                }
+            }
+        }
+    }
+
+    public void CheckPointOnCurrentRoom(Vec3 pointToCheck)
+    {
+        CheckPointOnAdjacentRooms(currentRoom, pointToCheck);
+    }
+    private void CheckConnectedRooms()
+    {
         foreach (Door door in currentRoom.doors)
         {
             if (IsDoorVisible(door, new Vec3(playerCamera.transform.position), new Vec3(playerCamera.transform.forward)))
@@ -91,10 +119,7 @@ public class RoomManager : MonoBehaviour
     {
         foreach (Room room in allRooms)
         {
-            foreach (GameObject obj in room.insideObjects)
-            {
-                obj.SetActive(false);
-            }
+            room.gameObject.SetActive(false);
         }
     }
     private void OnDrawGizmos()

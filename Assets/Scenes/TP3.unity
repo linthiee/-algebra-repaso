@@ -1397,7 +1397,7 @@ GameObject:
   - component: {fileID: 499740788}
   - component: {fileID: 499740789}
   m_Layer: 0
-  m_Name: Door
+  m_Name: DoorTest
   m_TagString: Untagged
   m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -1411,13 +1411,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 499740787}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 5.51, y: 1.9070001, z: 0.26999998}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 631559042}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!114 &499740789
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4916,6 +4916,8 @@ MonoBehaviour:
   - {fileID: 479618639}
   - {fileID: 2082985291}
   - {fileID: 738712498}
+  - {fileID: 1269294069}
+  alreadyCheckedRooms: []
   playerCamera: {fileID: 1124142059}
   player: {fileID: 1926372121}
   frustum: {fileID: 1197333389}
@@ -5236,8 +5238,17 @@ MonoBehaviour:
   mainCamera: {fileID: 1124142059}
   mouseSensitivity: 3
   speed: 5
-  currentRoom: {fileID: 0}
-  testDoor: {fileID: 0}
+  roomManager: {fileID: 1769042423}
+  playerRay:
+  - originalPos:
+      x: 0
+      y: 0
+      z: 0
+    direction:
+      x: 0
+      y: 0
+      z: 0
+  rayLength: 15
 --- !u!54 &1926372123
 Rigidbody:
   m_ObjectHideFlags: 0
