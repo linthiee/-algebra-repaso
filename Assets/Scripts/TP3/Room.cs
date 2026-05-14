@@ -14,6 +14,8 @@ public class Room : MonoBehaviour
 
     private Vec3 extents;
 
+    public bool hasBeenChecked = false;
+
     private void Start()
     {
         extents = new Vec3(roomVolume.localScale.x / 2, roomVolume.localScale.y / 2, roomVolume.localScale.z / 2);

@@ -5,7 +5,6 @@ using CustomMath;
 public class RoomManager : MonoBehaviour
 {
     public List<Room> allRooms;
-    public List<Room> alreadyCheckedRooms;
 
     public Camera playerCamera;
     public Transform player;
@@ -23,6 +22,7 @@ public class RoomManager : MonoBehaviour
             if (room.ContainsPlayer(new Vec3(player.position)))
             {
                 room.gameObject.SetActive(true);
+                room.hasBeenChecked = true;
 
                 Debug.Log($"{room.name} is the current room");
                 currentRoom = room;
@@ -47,14 +47,37 @@ public class RoomManager : MonoBehaviour
             {
                 if (door.connectedRoom.ContainsPlayer(pointToCheck))
                 {
-                    door.connectedRoom.gameObject.SetActive(true);
-                    foreach (GameObject obj in door.connectedRoom.insideObjects)
+                    if (!door.connectedRoom.hasBeenChecked)
                     {
-                        obj.SetActive(true);
+                        door.connectedRoom.hasBeenChecked = true;
+                        door.connectedRoom.gameObject.SetActive(true);
+
+                        foreach (GameObject obj in door.connectedRoom.insideObjects)
+                        {
+                            obj.SetActive(true);
+                        }
+
+                        CheckPointOnAdjacentRooms(door.connectedRoom, pointToCheck);
                     }
                 }
             }
         }
+
+        //foreach (Room roomToCheck in allRooms)
+        //{
+        //    if (roomToCheck.ContainsPlayer(pointToCheck))
+        //    {
+        //        if (!roomToCheck.hasBeenChecked)
+        //        {
+        //            roomToCheck.hasBeenChecked = true;
+        //            roomToCheck.gameObject.SetActive(true);
+        //            foreach (GameObject obj in roomToCheck.insideObjects)
+        //            {
+        //                obj.SetActive(true);
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     public void CheckPointOnCurrentRoom(Vec3 pointToCheck)
@@ -120,6 +143,7 @@ public class RoomManager : MonoBehaviour
         foreach (Room room in allRooms)
         {
             room.gameObject.SetActive(false);
+            room.hasBeenChecked = false;
         }
     }
     private void OnDrawGizmos()
