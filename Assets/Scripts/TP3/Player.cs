@@ -9,6 +9,9 @@ public class Player : MonoBehaviour
     [SerializeField] private float mouseSensitivity = 1.0f;
     [SerializeField] private float speed = 5.0f;
 
+    public RoomManager currentRoom;
+    public Transform testDoor;
+
     private Vec3 moveDirection;
 
     private Vec3[] playerRay = new Vec3[1];

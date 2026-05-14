@@ -100,5 +100,26 @@ namespace CustomMath
             string planeInfo = "Plane normal: " + normal.ToString() + "  Distance: " + distance.ToString();
             return planeInfo;
         }
+        public bool IsRayOnPlane(Vec3 rayOrigin, Vec3 rayDirection, MyPlane plane, out Vec3 intersectionPoint)
+        {
+            float denominator = Vec3.Dot(plane.normal, rayDirection);
+
+            if (Mathf.Abs(denominator) < 0.0001f)
+            {
+                intersectionPoint = Vec3.Zero; 
+                return false;
+            }
+
+            float t = -plane.GetDistanceToPoint(rayOrigin) / denominator;
+
+            if (t < 0)
+            {
+                intersectionPoint = Vec3.Zero;
+                return false;
+            }
+
+            intersectionPoint = rayOrigin + (rayDirection * t);
+            return true;
+        }
     }
 }

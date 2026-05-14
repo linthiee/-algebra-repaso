@@ -10,7 +10,7 @@ public class Room : MonoBehaviour
 
     public Transform roomVolume;
 
-    private MyPlane[] boundingPlanes = new MyPlane[6];
+    public MyPlane[] boundingPlanes = new MyPlane[6];
 
     private Vec3 extents;
 
