@@ -82,10 +82,11 @@ public class Player : MonoBehaviour
         {
             Vec3 origin = new Vec3(mainCamera.transform.position);
 
-            for (int i = 0; i < maxCheckPerRay; i++)
+            for (int i = 0; i <= maxCheckPerRay; i++)
             {
+                HashSet<Room> alreadyCheckedRooms = new HashSet<Room>();
                 Vec3 point = Vec3.Lerp(line.originalPos, line.direction * rayLength, (float)i / maxCheckPerRay);
-                roomManager.CheckPointOnCurrentRoom(point + origin);
+                roomManager.CheckPointOnCurrentRoom(point + origin, alreadyCheckedRooms);
             }
         }
     }
@@ -103,7 +104,7 @@ public class Player : MonoBehaviour
         {
             Gizmos.DrawRay(origin + line.originalPos, line.direction * rayLength);
 
-            for (int i = 0; i < maxCheckPerRay; i++)
+            for (int i = 0; i <= maxCheckPerRay; i++)
             {
                 Vec3 pointToCheck = Vec3.Lerp(line.originalPos, line.direction * rayLength, (float)i / maxCheckPerRay);
                 Gizmos.DrawWireSphere(pointToCheck + origin, 0.5f);

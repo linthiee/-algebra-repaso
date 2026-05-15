@@ -39,25 +39,30 @@ public class RoomManager : MonoBehaviour
         CheckConnectedRooms();
     }
 
-    public void CheckPointOnAdjacentRooms(Room room, Vec3 pointToCheck)
+    public void CheckPointOnAdjacentRooms(Room room, Vec3 pointToCheck, HashSet<Room> visitedRooms)
     {
         foreach (Door door in room.doors)
         {
-            if (door.connectedRoom != null)
-            {
-                if (door.connectedRoom.ContainsPlayer(pointToCheck))
+            if (IsDoorVisible(door, new Vec3(playerCamera.transform.position), new Vec3(playerCamera.transform.forward)))
+            { 
+                if (!visitedRooms.Contains(door.connectedRoom))
                 {
-                    if (!door.connectedRoom.hasBeenChecked)
+                    visitedRooms.Add(door.connectedRoom);
+
+                    if (door.connectedRoom != null)
                     {
-                        door.connectedRoom.hasBeenChecked = true;
-                        door.connectedRoom.gameObject.SetActive(true);
-
-                        foreach (GameObject obj in door.connectedRoom.insideObjects)
+                        if (door.connectedRoom.ContainsPlayer(pointToCheck))
                         {
-                            obj.SetActive(true);
-                        }
+                            door.connectedRoom.hasBeenChecked = true;
+                            door.connectedRoom.gameObject.SetActive(true);
 
-                        CheckPointOnAdjacentRooms(door.connectedRoom, pointToCheck);
+                            foreach (GameObject obj in door.connectedRoom.insideObjects)
+                            {
+                                obj.SetActive(true);
+                            }
+
+                            CheckPointOnAdjacentRooms(door.connectedRoom, pointToCheck, visitedRooms);
+                        }
                     }
                 }
             }
@@ -80,9 +85,9 @@ public class RoomManager : MonoBehaviour
         //}
     }
 
-    public void CheckPointOnCurrentRoom(Vec3 pointToCheck)
+    public void CheckPointOnCurrentRoom(Vec3 pointToCheck, HashSet<Room> visitedRooms)
     {
-        CheckPointOnAdjacentRooms(currentRoom, pointToCheck);
+        CheckPointOnAdjacentRooms(currentRoom, pointToCheck, visitedRooms);
     }
     private void CheckConnectedRooms()
     {
@@ -120,15 +125,6 @@ public class RoomManager : MonoBehaviour
             if (door.name == "DoorTest")
 
                 Debug.Log($"2 {door.name} facing backwards from camera");
-
-            return false;
-        }
-
-        //is door in frustum?
-        if (!frustum.IsPointInside(doorPos))
-        {
-            if (door.name == "DoorTest")
-                Debug.Log($"3 {door.name} not in frustum");
 
             return false;
         }
