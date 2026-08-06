@@ -106,6 +106,9 @@ public class RoomManager : MonoBehaviour
 
     public bool IsDoorVisible(Door door, Vec3 camPosition, Vec3 camForward)
     {
+        //CHECK
+        //chequear con el lookingAt de la camara
+        
         Vec3 normalDoor = new Vec3(door.transform.forward);
         Vec3 doorPos = new Vec3(door.transform.position);
         MyPlane doorPlane = new MyPlane(normalDoor, doorPos);

@@ -14,7 +14,8 @@ public class Player : MonoBehaviour
         public Vec3 originalDirection;
     }
 
-    [SerializeField] private int maxRays = 6;
+    [SerializeField] private int xMaxRays = 6;
+    [SerializeField] private int yMaxRays = 6;
 
     [SerializeField] private int maxCheckPerRay = 6;
 
@@ -32,17 +33,41 @@ public class Player : MonoBehaviour
 
     [SerializeField] private float rayLength = 15.0f;
 
-    private float angle;
+    private float xAngle;
+    private float yAngle;
+
+    private float pitch;
+    private float yaw;
+    
     private void Start()
     {
-        for (int i = 0; i <= maxRays; i++)
-        {
-            angle = Mathf.Lerp(-mainCamera.fieldOfView, mainCamera.fieldOfView, (float)i / maxRays);
-            Quaternion rotAngle = Quaternion.Euler(0, angle, 0);
+        //Cursor.visible = false;
+        //Cursor.lockState = CursorLockMode.Locked;
+        
+        float tanHalfFov = Mathf.Tan(mainCamera.fieldOfView * 0.5f * Mathf.Deg2Rad);
+        float yMax = tanHalfFov; 
+        float xMax = yMax * mainCamera.aspect;
 
-            playerRay.Add(new Line { originalPos = Vec3.Zero, direction = new Vec3(rotAngle * Vec3.Forward), originalDirection = new Vec3(rotAngle * Vec3.Forward) });
+        for (int i = 0; i <= xMaxRays; i++)
+        {
+            xAngle = Mathf.Lerp(-xMax, xMax, (float)i / xMaxRays);
+
+            for (int j = 0; j <= yMaxRays; j++)
+            {
+                yAngle = Mathf.Lerp(-yMax, yMax, (float)j / yMaxRays);
+
+                Vector3 dir = new Vector3(xAngle, yAngle, 1f).normalized;
+                
+                playerRay.Add(new Line
+                {
+                    originalPos = Vec3.Zero,
+                    direction = new Vec3(dir),
+                    originalDirection = new Vec3(dir),
+                });
+            }
         }
     }
+
     private void Update()
     {
         Vec3 direction = Vec3.Zero;
@@ -51,14 +76,17 @@ public class Player : MonoBehaviour
         {
             direction += new Vec3(-transform.forward);
         }
+
         if (Input.GetKey(KeyCode.S))
         {
             direction += new Vec3(transform.forward);
         }
+
         if (Input.GetKey(KeyCode.A))
         {
             direction += new Vec3(transform.right);
         }
+
         if (Input.GetKey(KeyCode.D))
         {
             direction += new Vec3(-transform.right);
@@ -66,13 +94,16 @@ public class Player : MonoBehaviour
 
         moveDirection = direction.normalized;
 
-        Vec3 playerScreenPos = new Vec3(mainCamera.WorldToScreenPoint(transform.position));
-        float deltaX = Input.mousePosition.x - playerScreenPos.x;
-        float deltaY = Input.mousePosition.y - playerScreenPos.y;
-        float angle = Mathf.Atan2(deltaX, deltaY) * Mathf.Rad2Deg;
+        float mouseX = Input.GetAxis("Mouse X");
+        float mouseY = Input.GetAxis("Mouse Y");
+        
+        yaw += mouseX * mouseSensitivity;
+        pitch += mouseY * mouseSensitivity; 
 
-        rb.rotation = Quaternion.Euler(0f, -angle * mouseSensitivity, 0f);
+        pitch = Mathf.Clamp(pitch, -89, 89);
 
+        rb.rotation = Quaternion.Euler(pitch, yaw, 0f);
+        
         foreach (Line line in playerRay)
         {
             line.direction = new Vec3(mainCamera.transform.rotation * line.originalDirection);
@@ -95,6 +126,7 @@ public class Player : MonoBehaviour
     {
         rb.MovePosition(rb.position + moveDirection * speed * Time.fixedDeltaTime);
     }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;

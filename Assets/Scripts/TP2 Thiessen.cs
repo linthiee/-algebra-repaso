@@ -81,6 +81,8 @@ public class TP2Thiessen : MonoBehaviour
             }
         }
 
+        OptimizePlanes();
+
         foreach (ThiessenPoints point in myPoints)
         {
             for (int p = size; p < point.boundingPlanes.Count; p++)
@@ -131,8 +133,7 @@ public class TP2Thiessen : MonoBehaviour
 
             if (point == activePoint)
             {
-                Gizmos.color = new Color(1, 1, 0, 0.2f);
-
+                Gizmos.color = Color.magenta;
                 for (int p = size; p < point.boundingPlanes.Count; p++)
                 {
                     MyPlane activePlane = point.boundingPlanes[p];
@@ -143,12 +144,14 @@ public class TP2Thiessen : MonoBehaviour
             }
         }
     }
+
     private MyPlane CreatePlane(Vec3 normal, float d)
     {
         MyPlane customPlane = new MyPlane(normal, d);
 
         return customPlane;
     }
+
     private void DrawPlane(MyPlane plane, Color color)
     {
         Vec3 customCenter = -new Vec3(plane.normal.x, plane.normal.y, plane.normal.z) * plane.distance;
@@ -165,5 +168,9 @@ public class TP2Thiessen : MonoBehaviour
                 planeRenderer.material.color = color;
             }
         }
+    }
+
+    private void OptimizePlanes()
+    {
     }
 }

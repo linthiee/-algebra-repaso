@@ -517,8 +517,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a66ef1b363e88f41a1f1bdf44f2aaf3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boundingPlaneSize: 5
-  numberOfPoints: 2
+  boundingPlaneSize: 20
+  numberOfPoints: 5
   planePrefab: {fileID: 8026847901424892888, guid: 4db4a1f1359fb6e40bbe30793f46403e, type: 3}
   playerTransform: {fileID: 1202098796}
 --- !u!4 &1373756623
