@@ -1,62 +1,56 @@
-using CustomMath;
 using System.Collections.Generic;
 using UnityEngine;
+using CustomMath;
 
 public class Room : MonoBehaviour
 {
     public List<GameObject> insideObjects;
-
     public List<Door> doors;
-
-    public Transform roomVolume;
-
-    public MyPlane[] boundingPlanes = new MyPlane[6];
-
-    private Vec3 extents;
 
     public bool hasBeenChecked = false;
 
-    private void Start()
+    public Transform roomVolume;
+
+    public bool isVisible = false;
+
+    public GameObject visibleChildren;
+
+    public void InitializeDoors()
     {
-        extents = new Vec3(roomVolume.localScale.x / 2, roomVolume.localScale.y / 2, roomVolume.localScale.z / 2);
-
-        boundingPlanes[0] = new MyPlane(Vec3.Down, new Vec3(roomVolume.position + (Vec3.Up * extents.y))); //up
-        boundingPlanes[1] = new MyPlane(Vec3.Up, new Vec3(roomVolume.position + (Vec3.Down * extents.y))); //down
-
-        boundingPlanes[2] = new MyPlane(Vec3.Right, new Vec3(roomVolume.position + (Vec3.Left * extents.x))); //left
-        boundingPlanes[3] = new MyPlane(Vec3.Left, new Vec3(roomVolume.position + (Vec3.Right * extents.x))); //right
-
-        boundingPlanes[4] = new MyPlane(Vec3.Forward, new Vec3(roomVolume.position + (Vec3.Back * extents.z))); //back
-        boundingPlanes[5] = new MyPlane(Vec3.Back, new Vec3(roomVolume.position + (Vec3.Forward * extents.z))); //forward
-    }
-
-    public bool ContainsPlayer(Vec3 checkPosition)
-    {
-        foreach (MyPlane plane in boundingPlanes)
+        if (doors != null)
         {
-            if (!plane.GetSide(checkPosition))
+            foreach (Door door in doors)
             {
-                return false;
+                door.Init();
             }
         }
-        return true;
+    }
+
+    public void SetVisible(bool state)
+    {
+        isVisible = state;
+
+        visibleChildren.SetActive(isVisible);
     }
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.blue;
-        Vec3 center = new Vec3(transform.position);
+        Gizmos.color = isVisible ? Color.green : new Color(1f, 0f, 0f, 0.3f);
 
-        for (int i = 0; i < 6; i++)
+        if (roomVolume != null)
         {
-            MyPlane plane = boundingPlanes[i];
-
-            float distanceToPlane = plane.GetDistanceToPoint(center);
-            Vec3 pointOnPlane = center - (plane.normal * distanceToPlane);
-
-            Gizmos.DrawLine(pointOnPlane, pointOnPlane + (plane.normal * 2.0f));
-            Gizmos.DrawSphere(pointOnPlane, 0.2f);
+            Gizmos.DrawWireCube(roomVolume.position, roomVolume.localScale);
         }
-
+        else
+        {
+            Gizmos.DrawWireCube(transform.position, Vec3.One * 10f); 
+        }
+        if (doors != null)
+        {
+            foreach (Door door in doors)
+            {
+                door.DrawGizmos();
+            }
+        }
     }
 }

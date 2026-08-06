@@ -1,5 +1,6 @@
 using CustomMath;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class TP2Thiessen : MonoBehaviour
@@ -172,5 +173,54 @@ public class TP2Thiessen : MonoBehaviour
 
     private void OptimizePlanes()
     {
+        int totalPlanesBefore = 0;
+        int totalPlanesAfter = 0;
+
+        foreach (ThiessenPoints point in myPoints)
+        {
+            List<MyPlane> globalPlanes = point.boundingPlanes.GetRange(0, size);
+            List<MyPlane> bisectorPlanes = point.boundingPlanes.GetRange(size, point.boundingPlanes.Count - size);
+
+            totalPlanesBefore += point.boundingPlanes.Count;
+
+            bisectorPlanes = bisectorPlanes.OrderBy(p => Mathf.Abs(Vec3.Dot(p.normal, point.position) + p.distance)).ToList();
+
+            List<MyPlane> optimizedBisectors = new List<MyPlane>();
+
+            foreach (MyPlane candidatePlane in bisectorPlanes)
+            {
+                bool isRedundant = false;
+
+                float candidateDist = Mathf.Abs(Vec3.Dot(candidatePlane.normal, point.position) + candidatePlane.distance);
+
+                foreach (MyPlane acceptedPlane in optimizedBisectors)
+                {
+                    float normalDot = Vec3.Dot(candidatePlane.normal, acceptedPlane.normal);
+
+                    if (normalDot > 0.85f)
+                    {
+                        float acceptedDist = Mathf.Abs(Vec3.Dot(acceptedPlane.normal, point.position) + acceptedPlane.distance);
+
+                        if (candidateDist >= acceptedDist)
+                        {
+                            isRedundant = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!isRedundant)
+                {
+                    optimizedBisectors.Add(candidatePlane);
+                }
+            }
+
+            point.boundingPlanes.Clear();
+            point.boundingPlanes.AddRange(globalPlanes);
+            point.boundingPlanes.AddRange(optimizedBisectors);
+            totalPlanesAfter += point.boundingPlanes.Count;
+        }
+
+        Debug.Log($"reduced total planes from {totalPlanesBefore} to {totalPlanesAfter}.");
     }
 }

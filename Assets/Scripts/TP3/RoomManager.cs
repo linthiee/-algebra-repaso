@@ -5,185 +5,96 @@ using CustomMath;
 public class RoomManager : MonoBehaviour
 {
     public List<Room> allRooms;
+    public BSPNode bspRoot;
 
-    public Camera playerCamera;
-    public Transform player;
-
-    private Room currentRoom;
-
-    public Frustum frustum;
-
-    private void Update()
+    public Room GetRoomAtPoint(Vec3 point, BSPNode node, bool debug = false)
     {
-        HideAllRooms();
+        if (node == null) 
+            return null;
+        if (node.isLeaf)
+            return node.room;
 
-        foreach (Room room in allRooms)
-        {
-            if (room.ContainsPlayer(new Vec3(player.position)))
-            {
-                room.gameObject.SetActive(true);
-                room.hasBeenChecked = true;
+        bool isFront = node.partitionPlane.GetSide(point);
 
-                Debug.Log($"{room.name} is the current room");
-                currentRoom = room;
-
-                foreach (GameObject obj in currentRoom.insideObjects)
-                {
-                    obj.SetActive(true);
-                }
-
-                break;
-            }
-        }
-
-        CheckConnectedRooms();
+        if (isFront)
+            return GetRoomAtPoint(point, node.frontNode, debug);
+        else
+            return GetRoomAtPoint(point, node.backNode, debug);
     }
 
-    public void CheckPointOnAdjacentRooms(Room room, Vec3 pointToCheck, HashSet<Room> visitedRooms)
+    public void BSPSearch(Vec3 rayOrigin, Vec3 rayDir, float maxDistance, BSPNode node, HashSet<Room> visibleRooms, bool debug = false)
     {
-        foreach (Door door in room.doors)
+        if (node == null)
+            return;
+
+        if (node.isLeaf)
         {
-            if (IsDoorVisible(door, new Vec3(playerCamera.transform.position), new Vec3(playerCamera.transform.forward)))
-            { 
-                if (!visitedRooms.Contains(door.connectedRoom))
+            if (debug)
+                Debug.Log($"Ray hit Leaf Room! {node.room.name}");
+
+            visibleRooms.Add(node.room);
+            return;
+        }
+
+        float denom = Vec3.Dot(rayDir, node.partitionPlane.normal);
+        bool originIsFront = node.partitionPlane.GetSide(rayOrigin);
+
+        BSPNode nearNode = originIsFront ? node.frontNode : node.backNode;
+        BSPNode farNode = originIsFront ? node.backNode : node.frontNode;
+
+        BSPSearch(rayOrigin, rayDir, maxDistance, nearNode, visibleRooms, debug);
+
+        if (Mathf.Abs(denom) > 0.0001f)
+        {
+            float distToPlane = node.partitionPlane.GetDistanceToPoint(rayOrigin);
+            float t = -distToPlane / denom;
+
+            if (t > 0 && t <= maxDistance)
+            {
+                Vec3 intersectionPoint = rayOrigin + (rayDir * t);
+
+                bool insideFrame = false;
+                if (node.portalDoors != null)
                 {
-                    visitedRooms.Add(door.connectedRoom);
-
-                    if (door.connectedRoom != null)
+                    foreach (Door door in node.portalDoors)
                     {
-                        if (door.connectedRoom.ContainsPlayer(pointToCheck))
+                        if (door.IsPointInsideFrame(intersectionPoint))
                         {
-                            door.connectedRoom.hasBeenChecked = true;
-                            door.connectedRoom.gameObject.SetActive(true);
-
-                            foreach (GameObject obj in door.connectedRoom.insideObjects)
-                            {
-                                obj.SetActive(true);
-                            }
-
-                            CheckPointOnAdjacentRooms(door.connectedRoom, pointToCheck, visitedRooms);
+                            insideFrame = true;
+                            if (debug)
+                                Debug.Log($"Ray intersects door plane '{door.doorTransform.name}' at distance {t}. inside frame true");
+                            break;
                         }
                     }
                 }
-            }
-        }
 
-        //foreach (Room roomToCheck in allRooms)
-        //{
-        //    if (roomToCheck.ContainsPlayer(pointToCheck))
-        //    {
-        //        if (!roomToCheck.hasBeenChecked)
-        //        {
-        //            roomToCheck.hasBeenChecked = true;
-        //            roomToCheck.gameObject.SetActive(true);
-        //            foreach (GameObject obj in roomToCheck.insideObjects)
-        //            {
-        //                obj.SetActive(true);
-        //            }
-        //        }
-        //    }
-        //}
-    }
+                if (insideFrame)
+                {            
+                    Vec3 newOrigin = intersectionPoint + (rayDir * 0.01f);
 
-    public void CheckPointOnCurrentRoom(Vec3 pointToCheck, HashSet<Room> visitedRooms)
-    {
-        CheckPointOnAdjacentRooms(currentRoom, pointToCheck, visitedRooms);
-    }
-    private void CheckConnectedRooms()
-    {
-        foreach (Door door in currentRoom.doors)
-        {
-            if (IsDoorVisible(door, new Vec3(playerCamera.transform.position), new Vec3(playerCamera.transform.forward)))
-            {
-                Debug.Log($"{door.name} is visible");
-                foreach (GameObject obj in door.connectedRoom.insideObjects)
+                    float newMaxDistance = maxDistance - t;
+
+                    BSPSearch(newOrigin, rayDir, newMaxDistance, farNode, visibleRooms, debug);
+                }
+                else
                 {
-                    obj.SetActive(true);
+                    return;
                 }
             }
         }
     }
 
-    public bool IsDoorVisible(Door door, Vec3 camPosition, Vec3 camForward)
+    public void UpdateRoomVisibility(HashSet<Room> visibleRooms)
     {
-        //CHECK
-        //chequear con el lookingAt de la camara
-        
-        Vec3 normalDoor = new Vec3(door.transform.forward);
-        Vec3 doorPos = new Vec3(door.transform.position);
-        MyPlane doorPlane = new MyPlane(normalDoor, doorPos);
 
-        //is the doors normal pointing towards the camera? if not, we are behind the door
-        if (!doorPlane.GetSide(camPosition))
-        {
-            if (door.name == "DoorTest")
-                Debug.Log($"1 {door.name} not on the same side");
-            return false;
-        }
-
-        //are we in front of the door or are we facing backwards?
-        float dotView = Vec3.Dot(camForward, normalDoor);
-        if (dotView > 0)
-        {
-            if (door.name == "DoorTest")
-
-                Debug.Log($"2 {door.name} facing backwards from camera");
-
-            return false;
-        }
-
-        if (door.name == "DoorTest")
-            Debug.Log($" {door.name} true");
-
-        return true;
-    }
-    private void HideAllRooms()
-    {
         foreach (Room room in allRooms)
         {
-            room.gameObject.SetActive(false);
-            room.hasBeenChecked = false;
+            room.SetVisible(false);
         }
-    }
-    private void OnDrawGizmos()
-    {
-        if (currentRoom == null)
-            return;
 
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(currentRoom.transform.position, 1.0f);
-
-        foreach (Door door in currentRoom.doors)
+        foreach (Room room in visibleRooms)
         {
-            if (door == null)
-                continue;
-
-            Vec3 posDoor = new Vec3(door.transform.position);
-
-            if (IsDoorVisible(door, new Vec3(player.transform.position), new Vec3(player.transform.forward)))
-            {
-
-                Gizmos.color = Color.magenta;
-                Gizmos.DrawLine(new Vec3(player.transform.position), posDoor);
-                Gizmos.DrawSphere(posDoor, 0.2f);
-
-                if (door.connectedRoom != null)
-                {
-                    Gizmos.color = Color.green;
-                    Gizmos.DrawWireCube(door.connectedRoom.transform.position, Vector3.one * 2f);
-
-                    Gizmos.color = new Color(0, 1, 0, 0.5f);
-                    Gizmos.DrawLine(posDoor, door.connectedRoom.transform.position);
-                }
-            }
-            else
-            {
-                Gizmos.color = Color.red;
-                Gizmos.DrawLine(new Vec3(player.transform.position), posDoor);
-
-                Gizmos.DrawRay(posDoor, Vector3.up * 0.5f);
-                Gizmos.DrawRay(posDoor, Vector3.left * 0.5f);
-            }
+            room.SetVisible(true);
         }
     }
 }

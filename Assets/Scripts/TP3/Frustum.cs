@@ -51,12 +51,14 @@ public class Frustum : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
+        Gizmos.color = Color.magenta;
+
+        Vector3 startPos = cam.transform.position + cam.transform.forward * (nearClip + 1f);
+
         for (int i = 0; i < 6; i++)
         {
-            MyPlane plane = planes[i];
-            Vec3 planeCenter = plane.normal * -plane.distance;
-            Gizmos.DrawLine(planeCenter, planeCenter + plane.normal);
+            Vector3 normal = new Vector3(planes[i].normal.x, planes[i].normal.y, planes[i].normal.z);
+            Gizmos.DrawRay(startPos, normal * 3f);
         }
     }
 }
